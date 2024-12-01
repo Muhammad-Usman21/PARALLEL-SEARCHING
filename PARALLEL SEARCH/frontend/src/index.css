@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+nav[aria-label="Sidebar"] {
+	border: none;
+	border-radius: 0;
+}
+
+nav[aria-label="Sidebar"] > div {
+	background-size: cover;
+	border-radius: 0;
+	background-attachment: fixed;
+}
+
+nav[aria-label="Sidebar"].light > div {
+	background-image: url("../sidebar-light.jpg");
+	border-right: 2px solid #047481;
+}
+
+nav[aria-label="Sidebar"].dark > div {
+	background-image: url("../sidebar-dark.jpg");
+	border-right: 2px solid #374151;
+}
+
+@media (min-width: 768px) {
+	nav[aria-label="Sidebar"] > div {
+		overflow: unset;
+	}
+	[data-testid="flowbite-sidebar-items"] {
+		position: sticky;
+		top: 90px;
+	}
+}
+
+form input,
+form textarea {
+	background-color: transparent !important;
+	backdrop-filter: blur(4px) !important;
+	border-radius: 0.5rem !important;
+	box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+	border: 2px solid rgba(255, 255, 255, 0.6);
+	color: #374151 !important;
+}
+
+.dark form input,
+.dark form textarea {
+	box-shadow: 0 5px 7px rgba(255, 255, 255, 0.1),
+		0 4px 6px rgba(255, 255, 255, 0.05) !important;
+	border: 2px solid rgba(255, 255, 255, 0.4);
+	color: aliceblue !important;
+}
+
+
+form button {
+	background-color: transparent !important;
+	backdrop-filter: blur(4px) !important;
+	box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+}
