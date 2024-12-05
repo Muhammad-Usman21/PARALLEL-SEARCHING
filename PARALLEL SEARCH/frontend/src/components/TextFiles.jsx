@@ -14,31 +14,24 @@ const TextFiles = () => {
 			return;
 		}
 
-		const fileReaders = Array.from(files).map((file) => {
-			return new Promise((resolve, reject) => {
-				if (file.type === "text/plain") {
-					const reader = new FileReader();
-					reader.onload = (e) => {
-						const content = e.target.result.split("\n");
-						const matches = content
-							.map((line, index) => ({ line, lineNumber: index + 1 }))
-							.filter((entry) => entry.line.includes(pattern.trim()));
-
-						resolve({ fileName: file.name, matches });
-					};
-					reader.onerror = (err) => reject(err);
-					reader.readAsText(file);
-				} else {
-					resolve({ fileName: file.name, matches: [] });
-				}
-			});
-		});
-
 		try {
-			const results = await Promise.all(fileReaders);
-			const searchResults = results.filter(
-				(result) => result.matches.length > 0
-			);
+			const formData = new FormData();
+			formData.append("pattern", pattern); // Append the search pattern
+			Array.from(files).forEach((file) => {
+				formData.append("files", file); // Append each file
+			});
+
+			const response = await fetch("http://127.0.0.1:5000/textFileSearch", {
+				method: "POST",
+				body: formData, // Send form data
+			});
+
+			if (!response.ok) {
+				throw new Error(`Error: ${response.statusText}`);
+			}
+
+			const searchResults = await response.json();
+			console.log(searchResults);
 
 			setData((prevData) => [
 				{
