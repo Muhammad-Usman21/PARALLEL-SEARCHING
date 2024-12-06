@@ -16,7 +16,7 @@ const TextFiles = () => {
 
 		try {
 			const formData = new FormData();
-			formData.append("pattern", pattern); // Append the search pattern
+			formData.append("pattern", pattern.toLowerCase().trim()); // Append the search pattern
 			Array.from(files).forEach((file) => {
 				formData.append("files", file); // Append each file
 			});
@@ -147,7 +147,8 @@ const TextFiles = () => {
 							</h2>
 						</div>
 						{dataObject.searchResults.map((result, index) => (
-							<div key={index} className="my-5">
+							<div key={index} className="my-6">
+								<hr className="border-gray-500 my-4" />
 								<h4 className="text-lg font-semibold">{result.fileName}</h4>
 								<p>
 									{result.matches.map((match, idx) => (
@@ -172,7 +173,8 @@ const TextFiles = () => {
 								</p>
 							</div>
 						))}
-						<div className="flex justify-between mt-10">
+						<hr className="border-gray-500" />
+						<div className="flex justify-between mt-6">
 							<span>
 								Click the "Download" button to save the above search results as
 								a text file.

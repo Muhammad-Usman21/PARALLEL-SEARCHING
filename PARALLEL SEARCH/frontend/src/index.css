@@ -51,9 +51,12 @@ form textarea {
 	color: aliceblue !important;
 }
 
-
 form button {
 	background-color: transparent !important;
 	backdrop-filter: blur(4px) !important;
 	box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+}
+
+.first-letter-uppercase::first-letter {
+	text-transform: uppercase;
 }
