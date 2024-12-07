@@ -23,4 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-.env
+# Ignore Python bytecode files
+*.pyc
+__pycache__/
+

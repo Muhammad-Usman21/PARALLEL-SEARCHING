@@ -3,3 +3,5 @@ flask-cors
 pdfplumber
 pdfminer.six
 fpdf
+python-dotenv
+pymupdf
