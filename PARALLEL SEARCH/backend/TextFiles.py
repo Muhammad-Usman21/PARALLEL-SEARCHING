@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify
 from concurrent.futures import ProcessPoolExecutor
-import os
+import os, re
 
 def process_chunk(chunk, start_line, pattern, fileName):
     matches = []
+    regex = re.compile(pattern, re.IGNORECASE)  # Compile the regex pattern once
     print(f"Process {os.getpid()} starting to process file '{fileName}' from line {start_line}")
     
     for i, line in enumerate(chunk):
-        if pattern in line:
+        if regex.search(line):
             matches.append({
                 "lineNumber": start_line + i,
                 "line": line.strip(),
