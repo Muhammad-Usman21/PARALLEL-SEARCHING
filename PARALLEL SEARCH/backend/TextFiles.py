@@ -1,55 +1,104 @@
-from flask import request, jsonify
-import concurrent.futures
-import traceback
-import re
+from flask import Flask, request, jsonify
+from concurrent.futures import ProcessPoolExecutor
+import os
 
-def search_in_lines(lines, pattern):
-    """
-    Searches for the pattern in the given lines in parallel using ThreadPoolExecutor.
-    The search is case-insensitive.
-    """
-    # Use re.IGNORECASE to make the pattern search case-insensitive
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = list(executor.map(
-            lambda item: {"line": item[1], "lineNumber": item[0] + 1}
-            if re.search(pattern, item[1], re.IGNORECASE) else None,
-            enumerate(lines)
-        ))
-    return [result for result in results if result]  # Filter out None
+def process_chunk(chunk, start_line, pattern, fileName):
+    matches = []
+    print(f"Process {os.getpid()} starting to process file '{fileName}' from line {start_line}")
+    
+    for i, line in enumerate(chunk):
+        if pattern in line:
+            matches.append({
+                "lineNumber": start_line + i,
+                "line": line.strip(),
+                "processId": os.getpid(),
+                "fileName": fileName
+            })
+            print(f"Process {os.getpid()} found pattern in file '{fileName}', line {start_line + i}")
+    
+    print(f"Process {os.getpid()} finished processing file '{fileName}' up to line {start_line + len(chunk)}")
+    return matches
 
-def process_file(file, pattern):
-    """
-    Reads the file, decodes it, and searches for the pattern in lines.
-    """
-    file_content = file.read().decode('utf-8').splitlines()
-    matches = search_in_lines(file_content, pattern)
-    return {"fileName": file.filename, "matches": matches}
+def divide_into_chunks(lines, chunk_size):
+    for i in range(0, len(lines), chunk_size):
+        yield lines[i:i + chunk_size]
 
+def parallel_search_in_file_content(file_content, pattern, fileName):
+    try:
+        lines = file_content.splitlines()
+        total_lines = len(lines)
+        total_cores = os.cpu_count()
+        chunk_size = total_lines // total_cores
+
+        if total_lines % total_cores != 0:
+            chunk_size += 1
+
+        results = []
+        with ProcessPoolExecutor() as executor:
+            futures = []
+            start_line = 1
+
+            for chunk in divide_into_chunks(lines, chunk_size):
+                futures.append(executor.submit(process_chunk, chunk, start_line, pattern, fileName))
+                start_line += len(chunk)
+
+            for future in futures:
+                results.extend(future.result())
+
+        return results
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return []
+
+def parallel_search_in_multiple_files(file_contents, pattern):
+    try:
+        results = []
+        with ProcessPoolExecutor() as executor:
+            futures = [
+                executor.submit(
+                    parallel_search_in_file_content,
+                    file_content['content'],
+                    pattern,
+                    file_content['filename']
+                ) for file_content in file_contents
+            ]
+
+            for future, file_content in zip(futures, file_contents):
+                matches = future.result()
+                if matches:
+                    results.append({
+                        "fileName": file_content['filename'],
+                        "matches": matches
+                    })
+
+        return results
+
+    except Exception as e:
+        print(f"An error occurred in multiple file search: {e}")
+        return []
 
 def text_files_searching():
     try:
-        # Get pattern and files from request
         pattern = request.form.get("pattern")
         uploaded_files = request.files.getlist("files")
 
-        if not pattern or not uploaded_files:
-            return jsonify({"error": "Pattern and files are required"}), 400
+        if not pattern:
+            return jsonify({"error": "No search pattern provided"}), 400
+        
+        if not uploaded_files:
+            return jsonify({"error": "No files uploaded"}), 400
 
-        results = []
+        file_contents = []
+        for uploaded_file in uploaded_files:
+            file_contents.append({
+                "filename": uploaded_file.filename,
+                "content": uploaded_file.read().decode('utf-8')
+            })
 
-        # Process files in parallel
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = [
-                executor.submit(process_file, file, pattern)
-                for file in uploaded_files
-                if file.content_type == 'text/plain'
-            ]
-
-            for future in concurrent.futures.as_completed(futures):
-                results.append(future.result())
-
-        return jsonify(results), 200
+        results = parallel_search_in_multiple_files(file_contents, pattern)
+        return jsonify(results)
 
     except Exception as e:
-        print("Error occurred:", traceback.format_exc())
-        return jsonify({"error": "Internal server error", "details": str(e)}), 500
+        print(f"An error occurred: {e}")
+        return jsonify({"error": "An internal error occurred"}), 500

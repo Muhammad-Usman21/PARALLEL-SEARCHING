@@ -7,7 +7,7 @@ def search_in_line(filename, pattern, line, line_number):
     if pattern in line:
         # Construct the output message
         message = (f"Process ID: {current_process().pid}, "
-                   f"Filename: {filename}, Line number: {line_number}, Line: {line.strip()}")
+                   f"Filename: {filename}, Line number: {line_number}")
         print(message)
 
 # Function to read a file and search for the pattern in each line using a separate ProcessPoolExecutor
@@ -40,7 +40,7 @@ def main(pattern, files):
 
 if __name__ == "__main__":
 # Generate a list of files from file1.txt to file50.txt
-    files = [f"file{i}.txt" for i in range(1, 51)]
-    pattern = "is"
+    files = [f"../Text Files/file{i}.txt" for i in range(1, 21)]
+    pattern = "programming"
 
     main(pattern, files)

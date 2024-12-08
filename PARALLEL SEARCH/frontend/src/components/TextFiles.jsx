@@ -60,7 +60,8 @@ const TextFiles = () => {
 				.map((result) => {
 					const fileNameHeader = `Results for: ${result.fileName}\n`;
 					const matchesText = result.matches
-						.map((match) => `Line ${match.lineNumber}: ${match.line}`)
+						// .map((match) => `Line ${match.lineNumber}: ${match.line}`)
+						.map((match) => `${match.line}`)
 						.join("\n");
 
 					return `${fileNameHeader}${matchesText}\n\n`;
@@ -153,7 +154,11 @@ const TextFiles = () => {
 								<p>
 									{result.matches.map((match, idx) => (
 										<p key={idx} className="text-justify">
-											Line {match.lineNumber}:{" "}
+											{/* <br />
+											Process ID <strong>{match.processId}</strong> found the
+											Line number <strong>{match.lineNumber}</strong> in file{" "}
+											<strong>{result.fileName}</strong>
+											<br /> */}
 											{match.line
 												.split(new RegExp(`(${dataObject.pattern})`, "gi"))
 												.map((part, i) =>
