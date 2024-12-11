@@ -90,15 +90,15 @@ const TextFiles = () => {
 				className="max-w-4xl my-10 mx-3 p-3 sm:mx-12 lg:mx-auto sm:p-10 self-center dark:shadow-whiteLg
 			bg-transparent border-2 border-white/40 dark:border-white/20 backdrop-blur-[30px] rounded-lg shadow-xl bg-white bg-opacity-35 dark:bg-transparent dark:bg-opacity-100">
 				<h1 className="text-center text-3xl mb-7 font-semibold uppercase">
-					Pattern Searching in text Files
+					Pattern Searching in Text/Docx/PDF Files
 				</h1>
 				<form className="flex flex-col gap-4" onSubmit={handleSearch}>
 					<div>
-						<Label value="Upload text files" className="m-2" />
+						<Label value="Upload text, docx or pdf files" className="m-2" />
 						<div className="flex gap-4">
 							<FileInput
 								type="file"
-								accept=".txt .docx .pdf"
+								accept=".txt,.docx,.pdf"
 								required
 								disabled={loading}
 								multiple

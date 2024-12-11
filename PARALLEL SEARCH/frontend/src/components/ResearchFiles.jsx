@@ -118,7 +118,7 @@ const ResearchFiles = () => {
 				</h1>
 				<form className="flex flex-col gap-4" onSubmit={handleSearch}>
 					<div>
-						<Label value="Upload PDF files" className="m-2" />
+						<Label value="Upload pdf files" className="m-2" />
 						<div className="flex gap-4">
 							<FileInput
 								type="file"
