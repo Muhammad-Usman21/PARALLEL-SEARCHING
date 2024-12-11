@@ -1,79 +1,284 @@
 from flask import Flask, request, jsonify
-import pdfplumber  # You can use pdfplumber for easier PDF text extraction
+from concurrent.futures import ProcessPoolExecutor, as_completed
+import fitz  # PyMuPDF
+import re
+import traceback
+
+def extract_title_from_pdf(document):
+    """Title extraction based on font size and positioning in the whole document."""
+    try:
+        title = "Unknown Title"
+        
+        # Extract text with details (font size, font style, position)
+        text_instances = []
+        
+        for page_num in range(len(document)):
+            page = document.load_page(page_num)
+            text_dict = page.get_text("dict")
+            
+            # print(f"Page {page_num} text data: {text_dict}")
+            
+            if "blocks" not in text_dict:
+                raise ValueError(f"Missing 'blocks' in page {page_num} text data")
+                
+            text_instances += text_dict["blocks"]  # Get text blocks with details
+        
+        # Analyze text blocks for large fonts
+        possible_titles = []
+        
+        for block in text_instances:
+            if block.get("type", -1) == 0:  # Ensure it's a text block
+                for line in block.get("lines", []):  # Iterate over lines
+                    for span in line.get("spans", []):  # Iterate over spans
+                        block_text = span.get("text", "").strip()
+                        block_font_size = span.get("size", 4)  # Default to 12 if font size not found
+
+                        if block_text and len(block_text) > 5:  # Ensure text is meaningful
+                            # Perform your logic with block_text and block_font_size
+                            # Ignore blocks with numbers as their main content
+                            if re.search(r"\d", block_text):
+                                continue  # Skip lines containing any number
+
+                            # print(f"Text: {block_text}, Font Size: {block_font_size}")
+                            possible_titles.append((block_text, block_font_size))
+                            
+        if possible_titles:
+            # Sort by font size (largest first)
+            possible_titles.sort(key=lambda x: x[1], reverse=True)
+            
+            # Find the largest font size
+            largest_font_size = possible_titles[0][1]
+
+            # Filter out titles with the largest font size, and exclude lines that are numeric-only
+            largest_titles = [
+                title[0]
+                for title in possible_titles
+                if title[1] == largest_font_size
+            ]
+
+            # If no valid titles found, fallback to "Unknown Title"
+            if largest_titles:
+                title = " ".join(largest_titles) if largest_titles else "Unknown Title"  # Combine remaining valid titles
+            else:
+                title = "Unknown Title"
+        else:
+            title = "Unknown Title"
+
+        return title
+
+    except Exception as e:
+        error_message = f"Error extracting title: {str(e)}"
+        # Print the traceback for more detailed error info
+        print("Exception details:")
+        print(traceback.format_exc())
+        return error_message
+
+    except Exception as e:
+        error_message = f"Error extracting title: {str(e)}"
+        # Print the traceback for more detailed error info
+        print("Exception details:")
+        print(traceback.format_exc())
+        return error_message
+    
+# def extract_text_from_pdf(file_content, filename, heading):
+    """Extract the title and a specific section from the uploaded PDF."""
+    try:
+        # Open the PDF using PyMuPDF (fitz)
+        document = fitz.open(stream=file_content, filetype="pdf")
+        section_text = []
+        # title = "Unknown Title"
+        capture = False
+        
+        title = extract_title_from_pdf(document)
+
+        # Iterate through the pages to extract the section
+        for page_num in range(len(document)):
+            page = document.load_page(page_num)
+            
+            # Extract text in various formats
+            # print("Plain Text:", page.get_text("text"))
+            # print("Text as Dictionary:", page.get_text("dict"))
+            print("Text as HTML:", page.get_text("html"))
+            # print("Text as XML:", page.get_text("xml"))
+            # print("Text as JSON:", page.get_text("json"))
+            
+            # search_results = page.search_for("abstract")
+            # print("Text Locations:", search_results)
+
+            text_lines = page.get_text("text").splitlines()
+
+            for line in text_lines:
+                normalized_line = line.strip().lower()
+
+                # Detect section heading
+                if re.match(rf"^{re.escape(heading)}\s*[:]?.*", normalized_line, re.IGNORECASE):
+                    capture = True
+                    section_text.append(line.strip())
+                    continue
+
+                # Stop capturing when encountering another heading or unrelated styles
+                if capture and (
+                    line.isupper() or line.istitle() or re.match(r"^[0-9]+\.", line) or line.strip() == ""
+                ):
+                    capture = False
+                    break
+
+                if capture:
+                    section_text.append(line.strip())
+
+        document.close()
+
+        return {
+            "fileName": filename,
+            "title": title,
+            "heading": heading,
+            "paragraph": ' '.join(section_text).strip() or "No paragraph found for the specified heading."
+        }
+    except Exception as e:
+        return {
+            "fileName": filename,
+            "title": "Error",
+            "heading": heading,
+            "paragraph": f"Error processing file: {str(e)}",
+        }
+
+def extract_text_from_pdf(file_content, filename, heading):
+    """Extract all text lines after a specified heading in a PDF."""
+    try:
+        # Open the PDF using PyMuPDF (fitz)
+        document = fitz.open(stream=file_content, filetype="pdf")
+        section_text = []
+        count = 0
+        size = 0  # Default font size is 0
+        color = (0, 0, 0)  # Default color is black
+        font = "unknown"  # Default font is unknown
+        # height = 0  # Default height is 0
+        # width = 0  # Default width is 0
+        # block_num = -9999999999999999
+        
+        title = extract_title_from_pdf(document)
+
+        # Normalize the heading for case-insensitive matching
+        normalized_heading = re.escape(heading.strip().lower())
+
+        # Iterate through the pages to extract the section
+        for page_num in range(len(document)):
+            page = document.load_page(page_num)
+            if count == 3:
+                break
+
+            # Extract text in 'dict' format
+            text_dict = page.get_text("dict")
+            if "blocks" not in text_dict:
+                continue  # Skip pages without 'blocks'
+
+            # Iterate over blocks
+            for block in text_dict["blocks"]:
+                # block_number = block.get("number", 0)
+                # print(f"Block number: {block_number}")
+                # if block_number == block_num+2:
+                #     count = 3
+                #     break
+                
+                if count == 3:
+                    break
+                
+                if block.get("type", -1) == 0:  # Ensure it's a text block
+                    for line in block.get("lines", []):  # Iterate over lines
+                        if count == 3:
+                            break
+                        
+                        for span in line.get("spans", []):
+                            line_text = span.get("text", "").strip()
+
+                            # If heading is found, start appending subsequent lines
+                            if line_text and count == 1:
+                                size = round(span.get("size", 0))
+                                color = span.get("color", (0, 0, 0))
+                                font = span.get("font", "unknown")
+                                # height = span.get("height", 0)
+                                # width = span.get("width", 0)
+                                # print(color, font, size, height, width)
+                                count = 2  # Reset the flag
+                                
+                            if (line_text == "") and count == 2:
+                                count = 3
+                                break
+
+                            if line_text and count == 2:
+                                # if color == span.get("color", (0, 0, 0)) and font == span.get("font", "unknown") and size == round(span.get("size", 0)):
+                                # if size == round(span.get("size", 0)) and height == span.get("height", 0) and width == span.get("width", 0):
+                                if size == round(span.get("size", 0)) and (not line_text.isupper() or color == span.get("color", (0, 0, 0))):
+                                    section_text.append(line_text)
+                                else:
+                                    count = 3
+                                    break
+                            
+                            if line_text and count == 1:
+                                section_text.append(line_text)
+                                    
+                            # Check if the line matches the heading
+                            if count == 0 and re.search(
+                                rf"^{normalized_heading}[:]?.*", line_text.lower(), re.IGNORECASE
+                            ):
+                                count = 1 # Heading found, start capturing from next line
+                                # block_num = block.get("number", 0)  # Store the block number
+                                # print("found")
+                                # print(block_num)
+
+        document.close()
+
+        return {
+            "fileName": filename,
+            "title": title,
+            "heading": heading,
+            "paragraph": ' '.join(section_text).strip() or "No paragraph found for the specified heading."
+        }
+    except Exception as e:
+        return {
+            "fileName": filename,
+            "title": "Error",
+            "heading": heading,
+            "paragraph": f"Error processing file: {str(e)}",
+        }
+
 
 def research_files_searching():
-    research_paper_headings = [
-        "Title",  # The title of the paper
-        "Abstract",  # A brief summary of the research paper
-        "Keywords",  # Keywords that summarize the content
-        "Introduction",  # The introduction to the topic and research problem
-        "Literature Review",  # Review of related work and existing research
-        "Methodology",  # Methods used in the research
-        "Data Collection",  # Description of how data was gathered
-        "Data Analysis",  # Analysis techniques used on the collected data
-        "Results",  # Results and findings from the research
-        "Discussion",  # Interpretation of the results
-        "Conclusion",  # The conclusion summarizing the findings and implications
-        "References",  # List of cited sources
-        "Acknowledgements",  # Recognition of people or organizations who contributed
-        "Appendices",  # Supplementary material and details (e.g., charts, raw data)
-        "Figures",  # All figures/tables/graphs used in the paper
-        "Limitations",  # Any limitations of the study or research
-        "Future Work",  # Suggested areas for future research
-        "Supplementary Information",  # Additional data or resources that support the paper
-        "Author Information",  # Information about the authors of the paper
-        "Citations",  # Citations of the paper in other works
-    ]
-
+    """Handle the file upload and process files in parallel."""
     try:
         heading = request.form["heading"]
         files = request.files.getlist("files")
+        
+        print(f"Received heading: {heading}")
+        print(f"Received files: {[file.filename for file in files]}")
 
-        search_results = []
+        # Prepare file contents for processing
+        file_data = [
+            {"content": file.read(), "filename": file.filename} for file in files
+        ]
 
-        # Process each uploaded file
-        for file in files:
-            pdf = pdfplumber.open(file)
-            title = ""
-            paragraph = ""
+        # Use ProcessPoolExecutor for parallel processing
+        results = []
+        with ProcessPoolExecutor() as executor:
+            futures = []
+            
+            for data in file_data:
+                # Submit the file content and filename to the worker function
+                futures.append(
+                    executor.submit(
+                        extract_text_from_pdf,
+                        data["content"],
+                        data["filename"],
+                        heading
+                    )
+                )
 
-            # Extract the text from the entire document
-            text_content = ""
-            for page in pdf.pages:
-                page_text = page.extract_text()
-                text_content += page_text
+            for future in as_completed(futures):
+                matches = future.result()
+                if matches:
+                    results.append(matches)
 
-            # Title extraction: first non-empty line in the first page
-            first_lines = text_content.split("\n")[:5]
-            title = next((line for line in first_lines if len(line.strip()) > 5), "Unknown Title")
-
-            # Search for the specified heading and extract the paragraph
-            start_index = text_content.lower().find(heading.lower())
-            if start_index != -1:
-                start_index += len(heading)  # Move past the heading itself
-                # Find the next heading to determine where the paragraph ends
-                next_heading_index = None
-                for next_heading in research_paper_headings:
-                    if next_heading.lower() != heading.lower():
-                        next_heading_index = text_content.lower().find(next_heading.lower(), start_index)
-                        if next_heading_index != -1:
-                            break
-                
-                if next_heading_index != -1:
-                    end_index = next_heading_index
-                else:
-                    end_index = len(text_content)  # If no next heading is found, extract till the end of the document
-                
-                paragraph = text_content[start_index:end_index].strip()
-
-            search_results.append({
-                "fileName": file.filename,
-                "title": title,
-                "heading": heading,
-                "paragraph": paragraph or "No paragraph found for the specified heading.",
-            })
-
-        return jsonify(search_results)
+        return jsonify(results)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

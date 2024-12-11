@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import os, re
 
 def process_chunk(chunk, start_line, pattern, fileName):
     matches = []
-    regex = re.compile(pattern, re.IGNORECASE)  # Compile the regex pattern once
+    regex = re.compile(pattern, re.IGNORECASE)
     print(f"Process {os.getpid()} starting to process file '{fileName}' from line {start_line}")
     
     for i, line in enumerate(chunk):
@@ -29,7 +29,7 @@ def parallel_search_in_file_content(file_content, pattern, fileName):
         lines = file_content.splitlines()
         total_lines = len(lines)
         total_cores = os.cpu_count()
-        chunk_size = total_lines // total_cores
+        chunk_size = max(1, total_lines // total_cores)
 
         if total_lines % total_cores != 0:
             chunk_size += 1
@@ -44,8 +44,10 @@ def parallel_search_in_file_content(file_content, pattern, fileName):
                 start_line += len(chunk)
 
             for future in futures:
-                results.extend(future.result())
-
+                matches = future.result()
+                if matches:
+                    results.extend(matches)
+                                    
         return results
 
     except Exception as e:
@@ -56,23 +58,26 @@ def parallel_search_in_multiple_files(file_contents, pattern):
     try:
         results = []
         with ProcessPoolExecutor() as executor:
-            futures = [
-                executor.submit(
-                    parallel_search_in_file_content,
-                    file_content['content'],
-                    pattern,
-                    file_content['filename']
-                ) for file_content in file_contents
-            ]
+            futures = []
+            
+            for file_content in file_contents:
+                futures.append(
+                    executor.submit(
+                        parallel_search_in_file_content,
+                        file_content['content'],
+                        pattern,
+                        file_content['filename']
+                    )
+                )
 
-            for future, file_content in zip(futures, file_contents):
+            for future in futures:
                 matches = future.result()
                 if matches:
                     results.append({
-                        "fileName": file_content['filename'],
+                        "fileName": matches[0]["fileName"],
                         "matches": matches
                     })
-
+        
         return results
 
     except Exception as e:
@@ -92,10 +97,12 @@ def text_files_searching():
 
         file_contents = []
         for uploaded_file in uploaded_files:
-            file_contents.append({
-                "filename": uploaded_file.filename,
-                "content": uploaded_file.read().decode('utf-8')
-            })
+            try:
+                content = uploaded_file.read().decode('utf-8')
+            except UnicodeDecodeError:
+                return jsonify({"error": f"Could not decode file: {uploaded_file.filename}"}), 400
+            
+            file_contents.append({"filename": uploaded_file.filename, "content": content})
 
         results = parallel_search_in_multiple_files(file_contents, pattern)
         return jsonify(results)

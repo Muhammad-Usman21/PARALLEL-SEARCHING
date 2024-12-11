@@ -18,12 +18,15 @@ const ResearchFiles = () => {
 	const [files, setFiles] = useState(null);
 	const [pattern, setPattern] = useState("");
 	const [data, setData] = useState([]);
+	const [loading, setLoading] = useState(false);
 
 	const handleSearch = async (event) => {
 		event.preventDefault();
+		setLoading(true);
 
 		if (files.length === 0 || !pattern) {
 			console.log("Please upload files and enter a pattern to search.");
+			setLoading(false);
 			return;
 		}
 
@@ -66,7 +69,10 @@ const ResearchFiles = () => {
 				},
 				...prevData,
 			]);
+
+			setLoading(false);
 		} catch (error) {
+			setLoading(false);
 			console.error("Error processing PDF files:", error);
 		}
 	};
@@ -118,6 +124,7 @@ const ResearchFiles = () => {
 								type="file"
 								accept=".pdf"
 								required
+								disabled={loading}
 								multiple
 								onChange={(e) => setFiles(e.target.files)}
 								className="w-full sm:w-auto flex-auto"
@@ -138,6 +145,7 @@ const ResearchFiles = () => {
 							placeholder="heading???"
 							rows={1}
 							value={pattern}
+							disabled={loading}
 							required
 							id="pattern"
 							className="flex-1"
@@ -148,8 +156,9 @@ const ResearchFiles = () => {
 						type="submit"
 						gradientDuoTone="purpleToPink"
 						outline
+						disabled={loading}
 						className="focus:ring-1 uppercase">
-						Search
+						{loading ? "Processing... Please wait!" : "Search"}
 					</Button>
 				</form>
 			</div>

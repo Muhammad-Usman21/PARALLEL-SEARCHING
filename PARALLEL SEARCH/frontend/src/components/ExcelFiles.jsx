@@ -13,11 +13,14 @@ const ExcelFiles = () => {
 	const [files, setFiles] = useState(null);
 	const [pattern, setPattern] = useState("");
 	const [data, setData] = useState([]);
+	const [loading, setLoading] = useState(false);
 
 	const handleSearch = async (event) => {
 		event.preventDefault();
+		setLoading(true);
 
 		if (!files || files.length === 0 || !pattern) {
+			setLoading(false);
 			console.log("Please upload files and enter a pattern to search.");
 			return;
 		}
@@ -89,7 +92,10 @@ const ExcelFiles = () => {
 				},
 				...prevData,
 			]);
+
+			setLoading(false);
 		} catch (error) {
+			setLoading(false);
 			console.error("Error reading files:", error);
 		}
 	};
@@ -114,6 +120,7 @@ const ExcelFiles = () => {
 								type="file"
 								accept=".xls, .xlsx"
 								required
+								disabled={loading}
 								multiple
 								onChange={(e) => setFiles(e.target.files)}
 								className="w-full sm:w-auto flex-auto"
@@ -134,6 +141,7 @@ const ExcelFiles = () => {
 							placeholder="search???"
 							rows={2}
 							value={pattern}
+							disabled={loading}
 							required
 							id="pattern"
 							className="flex-1"
@@ -144,8 +152,9 @@ const ExcelFiles = () => {
 						type="submit"
 						gradientDuoTone="purpleToPink"
 						outline
+						disabled={loading}
 						className="focus:ring-1 uppercase">
-						Search
+						{loading ? "Processing... Please wait!" : "Search"}
 					</Button>
 				</form>
 			</div>

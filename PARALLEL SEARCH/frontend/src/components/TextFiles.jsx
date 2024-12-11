@@ -5,11 +5,14 @@ const TextFiles = () => {
 	const [files, setFiles] = useState(null);
 	const [pattern, setPattern] = useState("");
 	const [data, setData] = useState([]);
+	const [loading, setLoading] = useState(false);
 
 	const handleSearch = async (event) => {
 		event.preventDefault();
+		setLoading(true);
 
 		if (files.length === 0 || !pattern) {
+			setLoading(false);
 			console.log("Please upload files and enter a pattern to search.");
 			return;
 		}
@@ -41,7 +44,10 @@ const TextFiles = () => {
 				},
 				...prevData,
 			]);
+
+			setLoading(false);
 		} catch (error) {
+			setLoading(false);
 			console.error("Error reading files:", error);
 		}
 	};
@@ -94,6 +100,7 @@ const TextFiles = () => {
 								type="file"
 								accept=".txt"
 								required
+								disabled={loading}
 								multiple
 								onChange={(e) => setFiles(e.target.files)}
 								className="w-full sm:w-auto flex-auto"
@@ -113,6 +120,7 @@ const TextFiles = () => {
 							type="text"
 							placeholder="Pattern to search???"
 							rows={2}
+							disabled={loading}
 							value={pattern}
 							required
 							id="pattern"
@@ -124,8 +132,9 @@ const TextFiles = () => {
 						type="submit"
 						gradientDuoTone="purpleToPink"
 						outline
+						disabled={loading}
 						className="focus:ring-1 uppercase">
-						Search
+						{loading ? "Processing... Please wait!" : "Search"}
 					</Button>
 				</form>
 			</div>
@@ -154,11 +163,11 @@ const TextFiles = () => {
 								<p>
 									{result.matches.map((match, idx) => (
 										<p key={idx} className="text-justify">
-											{/* <br />
+											<br />
 											Process ID <strong>{match.processId}</strong> found the
 											Line number <strong>{match.lineNumber}</strong> in file{" "}
-											<strong>{result.fileName}</strong>
-											<br /> */}
+											<strong>{match.fileName}</strong>
+											<br />
 											{match.line
 												.split(new RegExp(`(${dataObject.pattern})`, "gi"))
 												.map((part, i) =>
