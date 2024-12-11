@@ -163,11 +163,11 @@ const TextFiles = () => {
 								<p>
 									{result.matches.map((match, idx) => (
 										<p key={idx} className="text-justify">
-											<br />
+											{/* <br />
 											Process ID <strong>{match.processId}</strong> found the
 											Line number <strong>{match.lineNumber}</strong> in file{" "}
 											<strong>{match.fileName}</strong>
-											<br />
+											<br /> */}
 											{match.line
 												.split(new RegExp(`(${dataObject.pattern})`, "gi"))
 												.map((part, i) =>

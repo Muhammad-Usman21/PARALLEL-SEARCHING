@@ -16,7 +16,7 @@ import React, { useState } from "react";
 
 const ResearchFiles = () => {
 	const [files, setFiles] = useState(null);
-	const [pattern, setPattern] = useState("");
+	const [pattern, setPattern] = useState("ABSTRACT");
 	const [data, setData] = useState([]);
 	const [loading, setLoading] = useState(false);
 
@@ -145,7 +145,7 @@ const ResearchFiles = () => {
 							placeholder="heading???"
 							rows={1}
 							value={pattern}
-							disabled={loading}
+							disabled
 							required
 							id="pattern"
 							className="flex-1"
