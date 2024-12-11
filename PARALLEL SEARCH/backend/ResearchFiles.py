@@ -4,6 +4,8 @@ import fitz  # PyMuPDF
 import re
 import traceback
 
+
+
 def extract_title_from_pdf(document):
     """Title extraction based on font size and positioning in the whole document."""
     try:
@@ -80,67 +82,7 @@ def extract_title_from_pdf(document):
         print(traceback.format_exc())
         return error_message
     
-# def extract_text_from_pdf(file_content, filename, heading):
-    """Extract the title and a specific section from the uploaded PDF."""
-    try:
-        # Open the PDF using PyMuPDF (fitz)
-        document = fitz.open(stream=file_content, filetype="pdf")
-        section_text = []
-        # title = "Unknown Title"
-        capture = False
-        
-        title = extract_title_from_pdf(document)
 
-        # Iterate through the pages to extract the section
-        for page_num in range(len(document)):
-            page = document.load_page(page_num)
-            
-            # Extract text in various formats
-            # print("Plain Text:", page.get_text("text"))
-            # print("Text as Dictionary:", page.get_text("dict"))
-            print("Text as HTML:", page.get_text("html"))
-            # print("Text as XML:", page.get_text("xml"))
-            # print("Text as JSON:", page.get_text("json"))
-            
-            # search_results = page.search_for("abstract")
-            # print("Text Locations:", search_results)
-
-            text_lines = page.get_text("text").splitlines()
-
-            for line in text_lines:
-                normalized_line = line.strip().lower()
-
-                # Detect section heading
-                if re.match(rf"^{re.escape(heading)}\s*[:]?.*", normalized_line, re.IGNORECASE):
-                    capture = True
-                    section_text.append(line.strip())
-                    continue
-
-                # Stop capturing when encountering another heading or unrelated styles
-                if capture and (
-                    line.isupper() or line.istitle() or re.match(r"^[0-9]+\.", line) or line.strip() == ""
-                ):
-                    capture = False
-                    break
-
-                if capture:
-                    section_text.append(line.strip())
-
-        document.close()
-
-        return {
-            "fileName": filename,
-            "title": title,
-            "heading": heading,
-            "paragraph": ' '.join(section_text).strip() or "No paragraph found for the specified heading."
-        }
-    except Exception as e:
-        return {
-            "fileName": filename,
-            "title": "Error",
-            "heading": heading,
-            "paragraph": f"Error processing file: {str(e)}",
-        }
 
 def extract_text_from_pdf(file_content, filename, heading):
     """Extract all text lines after a specified heading in a PDF."""
@@ -243,6 +185,7 @@ def extract_text_from_pdf(file_content, filename, heading):
         }
 
 
+
 def research_files_searching():
     """Handle the file upload and process files in parallel."""
     try:
@@ -282,3 +225,5 @@ def research_files_searching():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+

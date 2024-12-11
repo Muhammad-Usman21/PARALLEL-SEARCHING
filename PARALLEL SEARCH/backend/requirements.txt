@@ -5,3 +5,5 @@ pdfminer.six
 fpdf
 python-dotenv
 pymupdf
+python-docx 
+PyPDF2

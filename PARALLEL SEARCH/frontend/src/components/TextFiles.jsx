@@ -98,7 +98,7 @@ const TextFiles = () => {
 						<div className="flex gap-4">
 							<FileInput
 								type="file"
-								accept=".txt"
+								accept=".txt .docx .pdf"
 								required
 								disabled={loading}
 								multiple
