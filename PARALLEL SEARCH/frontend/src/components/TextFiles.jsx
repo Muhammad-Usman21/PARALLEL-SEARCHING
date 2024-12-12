@@ -24,13 +24,10 @@ const TextFiles = () => {
 				formData.append("files", file); // Append each file
 			});
 
-			const response = await fetch(
-				"https://file-search-backend.onrender.com/textFileSearch",
-				{
-					method: "POST",
-					body: formData, // Send form data
-				}
-			);
+			const response = await fetch("http://127.0.0.1:5000/textFileSearch", {
+				method: "POST",
+				body: formData, // Send form data
+			});
 
 			if (!response.ok) {
 				throw new Error(`Error: ${response.statusText}`);
