@@ -11,14 +11,14 @@ export default defineConfig({
 	server: {
 		host: "0.0.0.0",
 		port: parseInt(process.env.VITE_PORT) || 5173, // Use BACKEND_PORT or fallback to 5173
-		proxy: {
-			"/api": {
-				target: process.env.VITE_APP_BACKEND_HOST,
-				secure: false,
-				changeOrigin: true,
-				rewrite: (path) => path.replace(/^\/api/, ""),
-			},
-		},
+		// proxy: {
+		// 	"/api": {
+		// 		target: process.env.VITE_APP_BACKEND_HOST,
+		// 		secure: false,
+		// 		changeOrigin: true,
+		// 		rewrite: (path) => path.replace(/^\/api/, ""),
+		// 	},
+		// },
 	},
 	build: {
 		target: "esnext", // Use the correct target for modern browsers

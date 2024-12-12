@@ -24,10 +24,13 @@ const TextFiles = () => {
 				formData.append("files", file); // Append each file
 			});
 
-			const response = await fetch(`/api/textFileSearch`, {
-				method: "POST",
-				body: formData, // Send form data
-			});
+			const response = await fetch(
+				`${import.meta.env.VITE_APP_BACKEND_HOST}/textFileSearch`,
+				{
+					method: "POST",
+					body: formData, // Send form data
+				}
+			);
 
 			if (!response.ok) {
 				throw new Error(`Error: ${response.statusText}`);
