@@ -20,4 +20,8 @@ export default defineConfig({
 			},
 		},
 	},
+	build: {
+		target: "esnext", // Use the correct target for modern browsers
+		minify: "esbuild", // Ensure the build is minified for production
+	},
 });
