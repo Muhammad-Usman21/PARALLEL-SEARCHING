@@ -40,10 +40,13 @@ const ResearchFiles = () => {
 			});
 
 			// Send the request to the server with the files and the search pattern
-			const response = await fetch("http://127.0.0.1:5000/researchFileSearch", {
-				method: "POST",
-				body: formData, // Send form data
-			});
+			const response = await fetch(
+				"https://file-search-backend.onrender.com/researchFileSearch",
+				{
+					method: "POST",
+					body: formData, // Send form data
+				}
+			);
 
 			if (!response.ok) {
 				throw new Error(`Error: ${response.statusText}`);
@@ -79,13 +82,16 @@ const ResearchFiles = () => {
 
 	const handleDownload = async (dataObject) => {
 		try {
-			const response = await fetch("http://127.0.0.1:5000/generate-pdf", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(dataObject),
-			});
+			const response = await fetch(
+				"https://file-search-backend.onrender.com/generate-pdf",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(dataObject),
+				}
+			);
 
 			if (!response.ok) {
 				throw new Error("Failed to generate PDF");
