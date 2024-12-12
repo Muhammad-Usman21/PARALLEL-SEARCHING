@@ -16,7 +16,7 @@ import React, { useState } from "react";
 
 const ResearchFiles = () => {
 	const [files, setFiles] = useState(null);
-	const [pattern, setPattern] = useState("ABSTRACT");
+	const [pattern, setPattern] = useState("");
 	const [data, setData] = useState([]);
 	const [loading, setLoading] = useState(false);
 
@@ -40,7 +40,7 @@ const ResearchFiles = () => {
 			});
 
 			// Send the request to the server with the files and the search pattern
-			const response = await fetch("http://127.0.0.1:5000/researchFileSearch", {
+			const response = await fetch(`/api/researchFileSearch`, {
 				method: "POST",
 				body: formData, // Send form data
 			});
@@ -79,7 +79,7 @@ const ResearchFiles = () => {
 
 	const handleDownload = async (dataObject) => {
 		try {
-			const response = await fetch("http://127.0.0.1:5000/generate-pdf", {
+			const response = await fetch(`/api/generate-pdf`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -124,7 +124,7 @@ const ResearchFiles = () => {
 							placeholder="heading???"
 							rows={1}
 							value={pattern}
-							disabled
+							disabled={loading}
 							required
 							id="pattern"
 							className="flex-1"

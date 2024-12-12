@@ -24,7 +24,7 @@ const TextFiles = () => {
 				formData.append("files", file); // Append each file
 			});
 
-			const response = await fetch("http://127.0.0.1:5000/textFileSearch", {
+			const response = await fetch(`/api/textFileSearch`, {
 				method: "POST",
 				body: formData, // Send form data
 			});
