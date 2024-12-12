@@ -41,7 +41,7 @@ const ResearchFiles = () => {
 
 			// Send the request to the server with the files and the search pattern
 			const response = await fetch(
-				`${process.env.VITE_APP_BACKEND_HOST}/researchFileSearch`,
+				`${import.meta.env.VITE_APP_BACKEND_HOST}/researchFileSearch`,
 				{
 					method: "POST",
 					body: formData, // Send form data
@@ -83,7 +83,7 @@ const ResearchFiles = () => {
 	const handleDownload = async (dataObject) => {
 		try {
 			const response = await fetch(
-				`${process.env.VITE_APP_BACKEND_HOST}/generate-pdf`,
+				`${import.meta.env.VITE_APP_BACKEND_HOST}/generate-pdf`,
 				{
 					method: "POST",
 					headers: {

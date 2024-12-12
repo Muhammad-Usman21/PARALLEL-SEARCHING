@@ -4,14 +4,14 @@ import os, re
 import io
 from docx import Document
 from PyPDF2 import PdfReader
-import fitz  # PyMuPDF
+import fitz
 
 
 
 def process_chunk(chunk, start_line, pattern, fileName):
     matches = []
     regex = re.compile(pattern, re.IGNORECASE)
-    print(f"Process {os.getpid()} starting to process file '{fileName}' from line {start_line}")
+    # print(f"Process {os.getpid()} starting to process file '{fileName}' from line {start_line}")
     
     for i, line in enumerate(chunk):
         if regex.search(line):
@@ -21,9 +21,9 @@ def process_chunk(chunk, start_line, pattern, fileName):
                 "processId": os.getpid(),
                 "fileName": fileName
             })
-            print(f"Process {os.getpid()} found pattern in file '{fileName}', line {start_line + i}")
+            # print(f"Process {os.getpid()} found pattern in file '{fileName}', line {start_line + i}")
     
-    print(f"Process {os.getpid()} finished processing file '{fileName}' up to line {start_line + len(chunk)}")
+    # print(f"Process {os.getpid()} finished processing file '{fileName}' up to line {start_line + len(chunk)}")
     return matches
 
 
@@ -36,10 +36,10 @@ def divide_into_chunks(lines, chunk_size):
 
 def parallel_search_in_file_content(content, pattern, fileName):
     try:
-        print(f"Process {os.getpid()} starting to process file '{fileName}'")
+        # print(f"Process {os.getpid()} starting to process file '{fileName}'")
 
         lines = []
-        file_ext = os.path.splitext(fileName)[1].lower()  # Extract file extension and make it lowercase
+        file_ext = os.path.splitext(fileName)[1].lower() 
         
         if file_ext == '.txt':
             lines = content.decode('utf-8').splitlines()
@@ -73,7 +73,7 @@ def parallel_search_in_file_content(content, pattern, fileName):
                     results.extend(matches)
         
                     
-        print(f"Process {os.getpid()} ending to process file '{fileName}'")
+        # print(f"Process {os.getpid()} ending to process file '{fileName}'")
         
         return results
 
@@ -175,45 +175,37 @@ def extraction_from_docx(content):
     all_content = []
 
     try:
-        # Open the .docx file
         doc = Document(io.BytesIO(content))
 
-        # Extract lines from paragraphs
         for paragraph in doc.paragraphs:
             paragraph_text = paragraph.text.strip()
             if paragraph_text:
-                all_content.append(paragraph_text)  # Add paragraph text to the list
+                all_content.append(paragraph_text)
 
-        # Handle tables in .docx files
         for table in doc.tables:
             for row in table.rows:
                 row_text = []
                 for cell in row.cells:
                     cell_text = cell.text.strip()
                     if cell_text:
-                        row_text.append(cell_text)  # Collect all cell texts in the row
+                        row_text.append(cell_text) 
                 if row_text:
-                    # Combine all cells in the row into a single string
                     all_content.append("    ".join(row_text))
 
-        # Extract text from shapes (e.g., textboxes)
+
         for shape in doc.inline_shapes:
-            if shape.type == 1:  # Only process shapes with text content (type 1 corresponds to textboxes)
-                # Check if the shape contains text
+            if shape.type == 1: 
                 textbox_doc = shape._element
                 if textbox_doc is not None:
                     for paragraph in textbox_doc.xpath(".//w:p"):
-                        # Extract the text content of the shape's paragraphs
                         texts = [node.text for node in paragraph.findall(".//w:t") if node.text]
                         if texts:
                             shape_text = "".join(texts).strip()
                             all_content.append(shape_text)
 
     except Exception as e:
-        # Catch all exceptions and log an error
         all_content.append(f"[Error processing .docx file: {str(e)}]")
 
-    # Split content into final lines at '. '
     final_content = []
     for line in all_content:
         split_lines = re.split(r'(?<=\.)\s+', line)
@@ -227,35 +219,29 @@ def extraction_from_pdfs(content):
     combined_content = []
 
     try:
-        # Open the PDF file
         pdf_document = fitz.open("pdf", content)
 
-        # Extract text from all pages
         for page in pdf_document:
-            blocks = page.get_text("dict")["blocks"]  # Extract blocks from the page
+            blocks = page.get_text("dict")["blocks"] 
             
             for block in blocks:
-                # Ensure the block contains text content
-                if "lines" in block and block.get("type", -1) == 0:  # 'type' 0 indicates text
+                if "lines" in block and block.get("type", -1) == 0: 
                     for line in block["lines"]:
                         line_text = ""
                         for span in line["spans"]:
                             span_text = span["text"].strip()
-                            if span_text:  # Add non-empty span text
+                            if span_text: 
                                 if line_text:
-                                    line_text += " "  # Add a space between spans
+                                    line_text += " " 
                                 line_text += span_text
-                        if line_text:  # Add non-empty lines
+                        if line_text:  
                             combined_content.append(line_text)
 
-        # Combine all lines into one list of text
-        full_text = " ".join(combined_content)  # Combine all lines into a single string
+        full_text = " ".join(combined_content) 
 
-        # Split the text at ". " (dot followed by space)
         final_content = re.split(r'(?<=\.)\s+', full_text)
 
     except Exception as e:
-        # Handle errors gracefully
         raise ValueError(f"Error extracting text from PDF: {str(e)}")
 
     return final_content
