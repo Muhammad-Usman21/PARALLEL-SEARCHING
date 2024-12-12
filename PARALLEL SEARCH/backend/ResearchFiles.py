@@ -3,6 +3,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import fitz  # PyMuPDF
 import re
 import traceback
+import os
 
 
 
@@ -87,6 +88,8 @@ def extract_title_from_pdf(document):
 def extract_text_from_pdf(file_content, filename, heading):
     """Extract all text lines after a specified heading in a PDF."""
     try:
+        print(f"Process {os.getpid()} starting to process file '{filename}'")
+
         # Open the PDF using PyMuPDF (fitz)
         document = fitz.open(stream=file_content, filetype="pdf")
         section_text = []
@@ -143,10 +146,6 @@ def extract_text_from_pdf(file_content, filename, heading):
                                 # print(color, font, size, height, width)
                                 count = 2  # Reset the flag
                                 
-                            if (line_text == "") and count == 2:
-                                count = 3
-                                break
-
                             if line_text and count == 2:
                                 # if color == span.get("color", (0, 0, 0)) and font == span.get("font", "unknown") and size == round(span.get("size", 0)):
                                 # if size == round(span.get("size", 0)) and height == span.get("height", 0) and width == span.get("width", 0):
@@ -156,8 +155,10 @@ def extract_text_from_pdf(file_content, filename, heading):
                                     count = 3
                                     break
                             
-                            if line_text and count == 1:
-                                section_text.append(line_text)
+                            if (line_text == "") and count == 2:
+                                count = 3
+                                break
+                        
                                     
                             # Check if the line matches the heading
                             if count == 0 and re.search(
@@ -169,12 +170,15 @@ def extract_text_from_pdf(file_content, filename, heading):
                                 # print(block_num)
 
         document.close()
+        
+        print(f"Process {os.getpid()} ending to process file '{filename}'")
 
         return {
             "fileName": filename,
             "title": title,
             "heading": heading,
-            "paragraph": ' '.join(section_text).strip() or "No paragraph found for the specified heading."
+            "paragraph": ' '.join(section_text).strip() or "No paragraph found for the specified heading.",
+            "processId": os.getpid(),
         }
     except Exception as e:
         return {
@@ -182,6 +186,7 @@ def extract_text_from_pdf(file_content, filename, heading):
             "title": "Error",
             "heading": heading,
             "paragraph": f"Error processing file: {str(e)}",
+            "processId": os.getpid(),
         }
 
 
@@ -220,6 +225,26 @@ def research_files_searching():
                 matches = future.result()
                 if matches:
                     results.append(matches)
+                    
+                    
+                    
+        # Dictionary to group file names by processId
+        process_files = {}
+
+        # Grouping files by processId
+        for entry in results:
+            process_id = entry["processId"]
+            file_name = entry["fileName"]
+            if process_id not in process_files:
+                process_files[process_id] = []
+            process_files[process_id].append(file_name)
+
+        # Printing the results
+        for process_id, files in process_files.items():
+            print(f"Process ID {process_id} processed {len(files)} file(s):")
+            for file in files:
+                print(f"- {file}")
+
 
         return jsonify(results)
 

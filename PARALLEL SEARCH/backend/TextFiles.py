@@ -35,7 +35,9 @@ def divide_into_chunks(lines, chunk_size):
 
 
 def parallel_search_in_file_content(content, pattern, fileName):
-    try: 
+    try:
+        print(f"Process {os.getpid()} starting to process file '{fileName}'")
+
         lines = []
         file_ext = os.path.splitext(fileName)[1].lower()  # Extract file extension and make it lowercase
         
@@ -69,7 +71,10 @@ def parallel_search_in_file_content(content, pattern, fileName):
                 matches = future.result()
                 if matches:
                     results.extend(matches)
-                                    
+        
+                    
+        print(f"Process {os.getpid()} ending to process file '{fileName}'")
+        
         return results
 
     except Exception as e:

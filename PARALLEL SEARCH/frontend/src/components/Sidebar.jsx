@@ -28,7 +28,7 @@ const DashSidebar = () => {
 							active={tab === "text" || tab === ""}
 							icon={HiDocumentText}
 							as="div">
-							Text Files
+							Pattern Searching
 						</Sidebar.Item>
 					</Link>
 					<Link to="/?tab=excel">

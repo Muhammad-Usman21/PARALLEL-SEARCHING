@@ -113,6 +113,20 @@ const ExcelFiles = () => {
 					Data Searching in Excel Files
 				</h1>
 				<form className="flex flex-col gap-4" onSubmit={handleSearch}>
+					<div className="">
+						<Label value="Enter anything to search" className="m-2" />
+						<Textarea
+							type="text"
+							placeholder="search???"
+							rows={1}
+							value={pattern}
+							disabled={loading}
+							required
+							id="pattern"
+							className="flex-1"
+							onChange={(e) => setPattern(e.target.value)}
+						/>
+					</div>
 					<div>
 						<Label value="Upload excel files" className="m-2" />
 						<div className="flex gap-4">
@@ -125,37 +139,16 @@ const ExcelFiles = () => {
 								onChange={(e) => setFiles(e.target.files)}
 								className="w-full sm:w-auto flex-auto"
 							/>
-							{/* <Button
-								type="button"
-								gradientDuoTone="purpleToBlue"
-								size="sm"
-								className="focus:ring-1 w-full sm:w-28">
-								Upload Files
-							</Button> */}
+							<Button
+								type="submit"
+								gradientDuoTone="purpleToPink"
+								outline
+								disabled={loading}
+								className="focus:ring-1 uppercase w-[250px]">
+								{loading ? "Processing... Please wait!" : "Search"}
+							</Button>
 						</div>
 					</div>
-					<div className="">
-						<Label value="Enter anything to search" className="m-2" />
-						<Textarea
-							type="text"
-							placeholder="search???"
-							rows={2}
-							value={pattern}
-							disabled={loading}
-							required
-							id="pattern"
-							className="flex-1"
-							onChange={(e) => setPattern(e.target.value)}
-						/>
-					</div>
-					<Button
-						type="submit"
-						gradientDuoTone="purpleToPink"
-						outline
-						disabled={loading}
-						className="focus:ring-1 uppercase">
-						{loading ? "Processing... Please wait!" : "Search"}
-					</Button>
 				</form>
 			</div>
 			{data.length > 0 &&

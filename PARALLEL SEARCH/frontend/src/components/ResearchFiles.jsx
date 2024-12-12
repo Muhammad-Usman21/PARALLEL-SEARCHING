@@ -117,27 +117,6 @@ const ResearchFiles = () => {
 					Select Headings from Research Papers
 				</h1>
 				<form className="flex flex-col gap-4" onSubmit={handleSearch}>
-					<div>
-						<Label value="Upload pdf files" className="m-2" />
-						<div className="flex gap-4">
-							<FileInput
-								type="file"
-								accept=".pdf"
-								required
-								disabled={loading}
-								multiple
-								onChange={(e) => setFiles(e.target.files)}
-								className="w-full sm:w-auto flex-auto"
-							/>
-							{/* <Button
-								type="button"
-								gradientDuoTone="purpleToBlue"
-								size="sm"
-								className="focus:ring-1 w-full sm:w-28">
-								Upload Files
-							</Button> */}
-						</div>
-					</div>
 					<div className="">
 						<Label value="Enter the heading" className="m-2" />
 						<Textarea
@@ -152,14 +131,28 @@ const ResearchFiles = () => {
 							onChange={(e) => setPattern(e.target.value)}
 						/>
 					</div>
-					<Button
-						type="submit"
-						gradientDuoTone="purpleToPink"
-						outline
-						disabled={loading}
-						className="focus:ring-1 uppercase">
-						{loading ? "Processing... Please wait!" : "Search"}
-					</Button>
+					<div>
+						<Label value="Upload pdf files" className="m-2" />
+						<div className="flex gap-4">
+							<FileInput
+								type="file"
+								accept=".pdf"
+								required
+								disabled={loading}
+								multiple
+								onChange={(e) => setFiles(e.target.files)}
+								className="w-full sm:w-auto flex-auto"
+							/>
+							<Button
+								type="submit"
+								gradientDuoTone="purpleToPink"
+								outline
+								disabled={loading}
+								className="focus:ring-1 uppercase w-[250px]">
+								{loading ? "Processing... Please wait!" : "Search"}
+							</Button>
+						</div>
+					</div>
 				</form>
 			</div>
 			{data.length > 0 &&
