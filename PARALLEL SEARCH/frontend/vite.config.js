@@ -24,5 +24,5 @@ export default defineConfig({
 		target: "esnext", // Use the correct target for modern browsers
 		minify: "esbuild", // Ensure the build is minified for production
 	},
-	base: "/PARALLEL%20SEARCH/frontend/",
+	base: "/",
 });
