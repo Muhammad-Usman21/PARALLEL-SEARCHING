@@ -5,8 +5,6 @@ import re
 import traceback
 import os
 
-
-
 def extract_title_from_pdf(document):
     """Title extraction based on font size and positioning in the whole document."""
     try:

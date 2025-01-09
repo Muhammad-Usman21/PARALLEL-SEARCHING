@@ -53,8 +53,7 @@ def generate_pdf():
         pdf.set_font("Times", size=12)
         pdf.multi_cell(0, 6, sanitize_text(paragraph), align="J")
 
-    # output_file = f"{data_object['pattern']}-{len(data_object['files'])}files.pdf"
-    output_file = f"output-file.pdf"
+    output_file = os.path.join(current_app.root_path, 'static', 'output-file.pdf')
     pdf.output(output_file)
 
     return send_file(output_file, as_attachment=True)
