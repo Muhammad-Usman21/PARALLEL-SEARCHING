@@ -1,0 +1,9 @@
+docx==0.2.4
+fitz==0.0.1.dev2
+Flask==3.1.0
+Flask_Cors==5.0.0
+fpdf==1.7.2
+PyPDF2==3.0.1
+gunicorn
+pyhton-docx
+PyMuPDF
