@@ -1,6 +1,6 @@
 # Parallel File Search Website
 
-Check out the live website here: [https://file-search-frontend.onrender.com](https://file-search-frontend.onrender.com)
+Check out the live website here: [https://parallel-searching-frontend.vercel.app/](https://parallel-searching-frontend.vercel.app/)
 
 -------
 
@@ -77,7 +77,7 @@ python run.py
 **Step 1:** Navigate to the frontend directory
 
 ```bash
-cd frontend
+cd frontend-v0
 ```
 
 **Step 2:** Install dependencies
