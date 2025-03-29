@@ -86,7 +86,7 @@ cd frontend-v0
 npm install
 ```
 
-**Step 3:** Create an `.env` file in frontend directory
+**Step 3:** Create an `.env` file in frontend-v0 directory
 
 Add the following to the `.env` file:
 
