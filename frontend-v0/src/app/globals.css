@@ -1,0 +1,237 @@
+@import "tailwindcss";
+@plugin 'tailwindcss-animate';
+
+@layer base {
+	:root {
+		--background: 0 0% 100%;
+		--foreground: 240 10% 3.9%;
+		--card: 0 0% 100%;
+		--card-foreground: 240 10% 3.9%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 240 10% 3.9%;
+		--primary: 240 5.9% 10%;
+		--primary-foreground: 0 0% 98%;
+		--secondary: 240 4.8% 95.9%;
+		--secondary-foreground: 240 5.9% 10%;
+		--muted: 240 4.8% 95.9%;
+		--muted-foreground: 240 3.8% 46.1%;
+		--accent: 240 4.8% 95.9%;
+		--accent-foreground: 240 5.9% 10%;
+		--destructive: 0 84.2% 60.2%;
+		--destructive-foreground: 0 0% 98%;
+		--border: 240 5.9% 90%;
+		--input: 240 5.9% 90%;
+		--ring: 240 5.9% 10%;
+		--radius: 0.5rem;
+	}
+
+	.dark {
+		--background: 240 10% 3.9%;
+		--foreground: 0 0% 98%;
+		--card: 240 10% 3.9%;
+		--card-foreground: 0 0% 98%;
+		--popover: 240 10% 3.9%;
+		--popover-foreground: 0 0% 98%;
+		--primary: 0 0% 98%;
+		--primary-foreground: 240 5.9% 10%;
+		--secondary: 240 3.7% 15.9%;
+		--secondary-foreground: 0 0% 98%;
+		--muted: 240 3.7% 15.9%;
+		--muted-foreground: 240 5% 64.9%;
+		--accent: 240 3.7% 15.9%;
+		--accent-foreground: 0 0% 98%;
+		--destructive: 0 62.8% 30.6%;
+		--destructive-foreground: 0 0% 98%;
+		--border: 240 3.7% 15.9%;
+		--input: 240 3.7% 15.9%;
+		--ring: 240 4.9% 83.9%;
+	}
+}
+
+@layer base {
+	* {
+		@apply border-border;
+	}
+	body {
+		@apply bg-background text-foreground;
+		font-feature-settings: "rlig" 1, "calt" 1;
+	}
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: hsl(var(--primary) / 0.2);
+	border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: hsl(var(--primary) / 0.3);
+}
+
+/* Smooth transitions for all elements */
+* {
+	transition-property: background-color, border-color, color, fill, stroke;
+	transition-duration: 200ms;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Form focus effects */
+input:focus,
+textarea:focus,
+select:focus {
+	@apply ring-2 ring-primary/30 ring-offset-1 ring-offset-background;
+	outline: none;
+}
+
+/* Button hover animations */
+button {
+	position: relative;
+	overflow: hidden;
+}
+
+button::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 5px;
+	height: 5px;
+	background: rgba(255, 255, 255, 0.4);
+	opacity: 0;
+	border-radius: 100%;
+	transform: scale(1, 1) translate(-50%, -50%);
+	transform-origin: 50% 50%;
+}
+
+button:focus:not(:active)::after {
+	animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+	0% {
+		transform: scale(0, 0);
+		opacity: 0.5;
+	}
+	100% {
+		transform: scale(20, 20);
+		opacity: 0;
+	}
+}
+
+/* Glass effect */
+.glass {
+	background: rgba(255, 255, 255, 0.05);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .glass {
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Gradient text */
+.gradient-text {
+	@apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70;
+}
+
+/* -------------------------------------------------
+   Define Theme Tokens with @theme (for colors & radius)
+-------------------------------------------------- */
+@theme {
+	/* Colors (the names here map to your Tailwind token names) */
+	--color-border: hsl(var(--border));
+	--color-input: hsl(var(--input));
+	--color-ring: hsl(var(--ring));
+	--color-background: hsl(var(--background));
+	--color-foreground: hsl(var(--foreground));
+
+	--color-primary: hsl(var(--primary));
+	--color-primary-foreground: hsl(var(--primary-foreground));
+
+	--color-secondary: hsl(var(--secondary));
+	--color-secondary-foreground: hsl(var(--secondary-foreground));
+
+	--color-destructive: hsl(var(--destructive));
+	--color-destructive-foreground: hsl(var(--destructive-foreground));
+
+	--color-muted: hsl(var(--muted));
+	--color-muted-foreground: hsl(var(--muted-foreground));
+
+	--color-accent: hsl(var(--accent));
+	--color-accent-foreground: hsl(var(--accent-foreground));
+
+	--color-popover: hsl(var(--popover));
+	--color-popover-foreground: hsl(var(--popover-foreground));
+
+	--color-card: hsl(var(--card));
+	--color-card-foreground: hsl(var(--card-foreground));
+
+	/* Border Radius values */
+	--radius-lg: var(--radius);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-sm: calc(var(--radius) - 4px);
+}
+
+/* Now, you can use these tokens in your HTML. For example:
+   <div class="bg-(--color-primary) text-(--color-primary-foreground)"></div>
+*/
+
+/* -------------------------------------------------
+   Container Styles
+   Tailwind’s container utility is configured in the config file.
+   To mimic your container settings in CSS, you can define a custom class.
+-------------------------------------------------- */
+@layer base {
+	.container {
+		padding: 2rem;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	@media (min-width: 1536px) {
+		/* 2xl breakpoint */
+		.container {
+			max-width: 1400px;
+		}
+	}
+}
+
+/* -------------------------------------------------
+   Keyframes & Animations
+   These need to be defined in your CSS since they aren’t automatically generated.
+-------------------------------------------------- */
+@keyframes accordion-down {
+	from {
+		height: 0;
+	}
+	to {
+		height: var(--radix-accordion-content-height);
+	}
+}
+
+@keyframes accordion-up {
+	from {
+		height: var(--radix-accordion-content-height);
+	}
+	to {
+		height: 0;
+	}
+}
+
+/* Optionally, create utility classes to trigger these animations */
+.accordion-down {
+	animation: accordion-down 0.2s ease-out;
+}
+.accordion-up {
+	animation: accordion-up 0.2s ease-out;
+}
